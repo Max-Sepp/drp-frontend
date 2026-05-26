@@ -1,19 +1,17 @@
-name: Backend tests
+name: Backend
 
 on:
   push:
-    branches-ignore:
-      - main
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-tests.yml'
+      - '.github/workflows/backend.yml'
   pull_request:
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-tests.yml'
+      - '.github/workflows/backend.yml'
 
 jobs:
-  pytest:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,3 +33,19 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy backend
+        run: railway up --service backend
+        working-directory: backend
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
