@@ -16,7 +16,7 @@ function App() {
     <main className="min-h-svh flex items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Hello, world</CardTitle>
+          <CardTitle>Hello there</CardTitle>
           <CardDescription>
             A starter page built with React, Vite, Tailwind, and shadcn/ui.
           </CardDescription>
