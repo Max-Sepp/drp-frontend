@@ -1,38 +1,37 @@
-# drp-frontend
+# DRP
 
-React + Vite + TypeScript app, styled with Tailwind CSS v4 and shadcn/ui.
+Monorepo containing the DRP application.
 
-## Prerequisites
+## Layout
 
-- Node.js 22.22+ or 24.15+
-- npm 10+
-
-## Install
-
-```bash
-npm install
+```
+.
+├── backend/    FastAPI service (Python)
+└── frontend/   React + Vite + Tailwind + shadcn/ui (TypeScript)
 ```
 
-## Run the development server
+## Getting started
+
+Each subproject is self-contained. See its README for full instructions.
+
+### Backend
 
 ```bash
+cd backend
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Serves on http://127.0.0.1:8000 (docs at `/docs`). See [`backend/README.md`](backend/README.md).
+
+### Frontend
+
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-Vite prints a local URL (default `http://localhost:5173`) — open it in your browser. The page hot-reloads on save.
-
-## Other scripts
-
-| Command           | Description                                          |
-| ----------------- | ---------------------------------------------------- |
-| `npm run build`   | Type-check and produce a production build in `dist/` |
-| `npm run preview` | Serve the production build locally                   |
-| `npm run lint`    | Lint the project with ESLint                         |
-
-## Adding shadcn/ui components
-
-```bash
-npx shadcn@latest add <component>
-```
-
-For example, `npx shadcn@latest add dialog`. Components land in `src/components/ui/`.
+Serves on http://localhost:5173. See [`frontend/README.md`](frontend/README.md).
