@@ -44,7 +44,7 @@ jobs:
 
       - name: Build with EAS
         run: >
-          npx eas-cli build
+          npx eas-cli@16.10.0 build
           --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }}
           --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }}
           --non-interactive
