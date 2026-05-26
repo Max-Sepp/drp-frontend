@@ -5,4 +5,4 @@ router = APIRouter(tags=["root"])
 
 @router.get("/")
 def read_root() -> dict[str, str]:
-    return {"Hello": "World"}
+    return {"Hello": "There is nothing here yet, but you can check out the /docs for API documentation!"}
