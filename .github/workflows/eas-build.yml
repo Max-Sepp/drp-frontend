@@ -30,7 +30,10 @@ on:
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      android-build-id: ${{ steps.eas-build.outputs.android-build-id }}
     defaults:
       run:
         working-directory: frontend
@@ -47,17 +50,21 @@ jobs:
         run: npm ci
 
       - name: Build with EAS
-        run: >
-          npx eas-cli@19.1.0 build
-          --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }}
-          --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }}
-          --non-interactive
+        id: eas-build
+        run: |
+          BUILDS=$(npx eas-cli@19.1.0 build \
+            --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }} \
+            --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }} \
+            --non-interactive \
+            --json)
+          ANDROID_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "ANDROID") | .id')
+          echo "android-build-id=$ANDROID_ID" >> "$GITHUB_OUTPUT"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: needs.build.outputs.android-build-id != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -68,12 +75,9 @@ jobs:
         id: apk
         working-directory: frontend
         run: |
-          URL=$(npx eas-cli@19.1.0 build:list \
-            --platform android \
-            --status finished \
-            --limit 1 \
+          URL=$(npx eas-cli@19.1.0 build:view ${{ needs.build.outputs.android-build-id }} \
             --json \
-            --non-interactive | jq -r '.[0].artifacts.applicationArchiveUrl')
+            --non-interactive | jq -r '.artifacts.applicationArchiveUrl')
           echo "url=$URL" >> "$GITHUB_OUTPUT"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
