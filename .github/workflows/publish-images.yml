@@ -3,16 +3,43 @@ name: Publish Docker images
 on:
   push:
     branches:
-      - main
+      - '**'
     tags:
       - 'v*'
+    paths:
+      - 'backend/**'
+      - '.github/workflows/publish-images.yml'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
+  compile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile
+        run: python -m compileall app/
+
   test-backend:
+    needs: compile
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -37,6 +64,7 @@ jobs:
 
   build-and-push:
     needs: test-backend
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -87,3 +115,16 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  deploy:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway redeploy --service drp-mobility-backend --yes
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
