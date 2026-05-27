@@ -27,6 +27,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      android-build-id: ${{ steps.eas-build.outputs.android-build-id }}
     defaults:
       run:
         working-directory: frontend
@@ -43,10 +45,47 @@ jobs:
         run: npm ci
 
       - name: Build with EAS
-        run: >
-          npx eas-cli@16.10.0 build
-          --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }}
-          --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }}
-          --non-interactive
+        id: eas-build
+        run: |
+          BUILDS=$(npx eas-cli@19.1.0 build \
+            --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }} \
+            --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }} \
+            --non-interactive \
+            --json)
+          ANDROID_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "ANDROID") | .id')
+          echo "android-build-id=$ANDROID_ID" >> "$GITHUB_OUTPUT"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+  release:
+    needs: build
+    if: needs.build.outputs.android-build-id != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Get APK download URL
+        id: apk
+        working-directory: frontend
+        run: |
+          URL=$(npx eas-cli@19.1.0 build:view ${{ needs.build.outputs.android-build-id }} \
+            --json \
+            --non-interactive | jq -r '.artifacts.applicationArchiveUrl')
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          TAG=${{ github.ref_name }}
+          cat > release-notes.md <<EOF
+          ### Downloads
+          **Android APK:** ${{ steps.apk.outputs.url }}
+          EOF
+          gh release create "$TAG" \
+            --title "Release $TAG" \
+            --notes-file release-notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
