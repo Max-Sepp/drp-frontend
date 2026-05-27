@@ -30,7 +30,6 @@ on:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       android-build-id: ${{ steps.eas-build.outputs.android-build-id }}
