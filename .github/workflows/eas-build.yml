@@ -59,7 +59,7 @@ jobs:
 
   release:
     needs: build
-    if: needs.build.outputs.android-build-id != '' && (github.event_name == 'push' || inputs.tag != '')
+    if: needs.build.outputs.android-build-id != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
