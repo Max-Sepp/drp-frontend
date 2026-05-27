@@ -44,7 +44,7 @@ jobs:
 
       - name: Build with EAS
         run: >
-          npx eas-cli@16.10.0 build
+          npx eas-cli@19.1.0 build
           --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }}
           --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }}
           --non-interactive
@@ -64,7 +64,7 @@ jobs:
         id: apk
         working-directory: frontend
         run: |
-          URL=$(npx eas-cli@16.10.0 build:list \
+          URL=$(npx eas-cli@19.1.0 build:list \
             --platform android \
             --status finished \
             --limit 1 \
