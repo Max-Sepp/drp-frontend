@@ -25,14 +25,25 @@ class OutageReportCreate(OutageReportBase):
     pass
 
 
-class OutageReport(OutageReportBase):
-    """Full outage report as returned by the API."""
+class OutageReportSummary(OutageReportBase):
+    """Outage report returned by list and single-item endpoints.
+
+    Image bytes are intentionally absent — use GET /outage-reports/{id}/image
+    to retrieve them.  `image_content_type` is kept so callers can tell whether
+    an image exists without downloading it.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    image_content_type: str | None = None
 
-    # These are omitted from responses by default; expose them only in a
-    # dedicated image-download endpoint to avoid bloating list responses.
+
+class OutageReport(OutageReportBase):
+    """Full outage report including raw image bytes (internal / download use)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
     image: bytes | None = None
     image_content_type: str | None = None
