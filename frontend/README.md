@@ -1,11 +1,15 @@
 # Frontend
 
-React + Vite + TypeScript app, styled with Tailwind CSS v4 and shadcn/ui.
+React Native mobile app built with [Expo](https://expo.dev) (SDK 54) and TypeScript. Distributed and updated via [EAS](https://expo.dev/eas).
+
+- Expo slug: `drp-mobility`
+- EAS project ID: `fa941353-94dc-490c-a5b0-209e52e4ee56`
 
 ## Prerequisites
 
-- Node.js 22.22+ or 24.15+
+- Node.js 22+
 - npm 10+
+- The [Expo Go](https://expo.dev/go) app on a physical device, or an Android/iOS simulator
 
 ## Install
 
@@ -13,26 +17,49 @@ React + Vite + TypeScript app, styled with Tailwind CSS v4 and shadcn/ui.
 npm install
 ```
 
-## Run the development server
+## Run locally
 
 ```bash
-npm run dev
+npm run start       # Metro bundler + QR code for Expo Go
+npm run android     # open on a connected Android device/emulator
+npm run ios         # open on an iOS simulator (macOS only)
 ```
 
-Vite prints a local URL (default `http://localhost:5173`) — open it in your browser. The page hot-reloads on save.
+Scan the QR code with Expo Go (Android) or the Camera app (iOS) to load the app on a physical device.
 
-## Other scripts
+## Accessing the deployed app
 
-| Command           | Description                                          |
-| ----------------- | ---------------------------------------------------- |
-| `npm run build`   | Type-check and produce a production build in `dist/` |
-| `npm run preview` | Serve the production build locally                   |
-| `npm run lint`    | Lint the project with ESLint                         |
+The app is shipped through EAS — there is no public web URL. There are two ways to get it onto a device:
 
-## Adding shadcn/ui components
+### 1. Install a build (production / preview)
+
+Builds are produced by the [`EAS Build`](../.github/workflows/eas-build.yml) GitHub Actions workflow:
+
+- **Production**: push a `v*` git tag (e.g. `v1.0.0`) — builds Android + iOS with the `production` profile.
+- **Preview**: trigger the workflow manually from the Actions tab and pick the `preview` profile.
+
+Once the build finishes:
+
+1. Open the EAS project dashboard: <https://expo.dev/accounts/_/projects/drp-mobility/builds> (or browse via the project ID `fa941353-94dc-490c-a5b0-209e52e4ee56`).
+2. Pick the latest build and download the artifact:
+   - **Android** — download the `.apk` and install it (enable "Install unknown apps" for your browser/file manager).
+   - **iOS** — production builds require a TestFlight invite; preview builds run on the iOS simulator only.
+
+### 2. Run the latest `main` via OTA update
+
+Any push to `main` that touches `frontend/**` triggers the [`EAS Update`](../.github/workflows/eas-update.yml) workflow, which publishes a JS bundle to the update channel matching the installed build's profile (`production` or `preview`).
+
+If you already have a build installed, reopening the app pulls the newest update from
+`https://u.expo.dev/fa941353-94dc-490c-a5b0-209e52e4ee56` automatically — no reinstall needed (native changes still require a fresh build).
+
+## Triggering builds and updates manually
+
+You need the `EXPO_TOKEN` secret configured in the repo (already set for CI). Locally:
 
 ```bash
-npx shadcn@latest add <component>
+npx eas-cli login
+npx eas-cli build   --profile preview --platform android   # ad-hoc build
+npx eas-cli update  --auto --non-interactive               # publish an OTA update
 ```
 
-For example, `npx shadcn@latest add dialog`. Components land in `src/components/ui/`.
+Build profiles live in [`eas.json`](./eas.json).
