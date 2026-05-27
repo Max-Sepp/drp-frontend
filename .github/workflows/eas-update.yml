@@ -27,6 +27,6 @@ jobs:
         run: npm ci
 
       - name: Publish EAS Update
-        run: npx eas-cli update --auto --non-interactive
+        run: npx eas-cli update --channel production --message "${{ github.event.head_commit.message }}" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
