@@ -68,6 +68,7 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
           placeholder="e.g. fallen light blocking path to escalator"
           placeholderTextColor="$gray9"
           numberOfLines={4}
+          textAlignVertical="top"
           style={{ minHeight: 100, borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
       </YStack>

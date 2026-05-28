@@ -175,6 +175,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
           placeholder="e.g. doors won't open..."
           placeholderTextColor="$gray9"
           numberOfLines={3}
+          textAlignVertical="top"
           style={{ minHeight: 80, borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
       </YStack>
