@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
-import { Alert, Image } from 'react-native'
+import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Input, ScrollView, TextArea, Text, XStack, YStack } from 'tamagui'
 import { stationPicker } from '../navigation/stationPicker'
@@ -29,6 +29,7 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
         <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
@@ -113,5 +114,6 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
         <Text color="white" fontSize={16} fontWeight="700">Submit</Text>
       </YStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   )
 }

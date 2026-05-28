@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
-import { Alert, Image } from 'react-native'
+import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView, Spinner, TextArea, Text, XStack, YStack } from 'tamagui'
 import { apiClient } from '../api/client'
@@ -69,6 +69,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
         <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
@@ -181,5 +182,6 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
         )}
       </YStack>
     </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
