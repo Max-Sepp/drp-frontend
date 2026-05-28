@@ -115,7 +115,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
 
       {/* Connection picker */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">{which}</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">{which}</Text>
         {connections.map(c => {
           const selected = connection === c
           return (
@@ -150,7 +150,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
 
       {/* Photo */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">attach photo (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Attach photo (optional)</Text>
         <YStack
           items="center"
           justify="center"
@@ -168,7 +168,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
 
       {/* Description */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">further comments (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Further comments (optional)</Text>
         <TextArea
           value={description}
           onChangeText={setDescription}

@@ -59,7 +59,7 @@ export default function ReportCustomScreen({ navigation }: ReportCustomScreenPro
 
       {/* Description */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">issue description</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Issue description</Text>
         <TextArea
           value={description}
           onChangeText={setDescription}
@@ -73,7 +73,7 @@ export default function ReportCustomScreen({ navigation }: ReportCustomScreenPro
 
       {/* Area */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">area within station (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Area within station (optional)</Text>
         <Input
           value={area}
           onChangeText={setArea}
@@ -85,7 +85,7 @@ export default function ReportCustomScreen({ navigation }: ReportCustomScreenPro
 
       {/* Photo */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">attach photo (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Attach photo (optional)</Text>
         <YStack
           items="center"
           justify="center"
