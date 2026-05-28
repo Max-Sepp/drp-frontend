@@ -91,18 +91,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Status */}
       {loading ? (
-        <YStack mx="$4" mt="$3" p="$5" items="center" style={{ backgroundColor: '#f3f4f6', borderRadius: 10 }}>
+        <YStack mx="$4" mt="$4" p="$5" items="center" style={{ backgroundColor: '#f3f4f6', borderRadius: 10 }}>
           <Spinner color="#9ca3af" />
         </YStack>
       ) : reports.length === 0 ? (
-        <YStack mx="$4" mt="$3" p="$5" items="center" gap="$3" style={{ backgroundColor: '#d8f3dc', borderRadius: 10 }}>
+        <YStack mx="$4" mt="$4" p="$5" items="center" gap="$3" style={{ backgroundColor: '#d8f3dc', borderRadius: 10 }}>
           <YStack style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#2d6a4f', alignItems: 'center', justifyContent: 'center' }}>
             <Text color="white" fontSize={24} fontWeight="700">✓</Text>
           </YStack>
           <Text fontSize={18} fontWeight="700" color="#1a3c2a">No known issues</Text>
         </YStack>
       ) : (
-        <YStack mx="$4" mt="$3" gap="$2">
+        <YStack mx="$4" mt="$4" gap="$2">
           {reports.map(r => {
             return (
               <YStack key={r.id} style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
@@ -138,7 +138,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       )}
 
       {/* Quick report grid */}
-      <Text fontSize={13} fontWeight="600" color="#374151" mt="$6" mb="$2" mx="$4">Quick report</Text>
+      <Text fontSize={13} fontWeight="600" color="#374151" mt="$4" mb="$2" mx="$4">Quick report</Text>
       <XStack flexWrap="wrap" mx="$4" gap="$2.5" justify="center">
         {GRID_ITEMS.map(item => {
           const disabled = 'disabled' in item
