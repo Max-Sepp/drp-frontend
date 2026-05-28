@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import Response
 
@@ -7,6 +9,29 @@ from app.schemas.outage_report import OutageReportCreate, OutageReportSummary
 router = APIRouter(prefix="/outage-reports", tags=["outage-reports"])
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+_EXT_TO_MIME = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+}
+
+
+def _resolve_content_type(file: UploadFile) -> str:
+    """Return the MIME type for *file*, falling back to filename extension."""
+    ct = (file.content_type or "").lower().split(";")[0].strip()
+    if ct in _ALLOWED_IMAGE_TYPES:
+        return ct
+    # React Native FormData sometimes omits or sends a generic content-type;
+    # fall back to the filename extension so uploads still work.
+    if file.filename:
+        ext = os.path.splitext(file.filename)[1].lower()
+        inferred = _EXT_TO_MIME.get(ext, "")
+        if inferred:
+            return inferred
+    return ct
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +102,7 @@ async def upload_image(
     if report is None:
         raise HTTPException(status_code=404, detail="Outage report not found")
 
-    content_type = file.content_type or ""
+    content_type = _resolve_content_type(file)
     if content_type not in _ALLOWED_IMAGE_TYPES:
         raise HTTPException(
             status_code=415,

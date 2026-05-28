@@ -45,10 +45,22 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
     ])
   }
 
+  const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
   async function submit() {
     if (!connection) {
       Alert.alert('Required', `Please select which ${equipmentType} is broken.`)
       return
+    }
+    if (photo) {
+      const mimeType = photo.mimeType || ''
+      if (!ALLOWED_MIME.has(mimeType)) {
+        Alert.alert(
+          'Unsupported image format',
+          `Please choose a JPEG, PNG, WebP, or GIF image. (Detected: ${mimeType || 'unknown'})`,
+        )
+        return
+      }
     }
     setSubmitting(true)
     try {
@@ -67,20 +79,23 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
         return
       }
       if (photo) {
+        const mimeType = photo.mimeType!
         const formData = new FormData()
         formData.append('file', {
           uri: photo.uri,
-          type: photo.mimeType ?? 'image/jpeg',
-          name: 'photo.jpg',
+          type: mimeType,
+          name: mimeType === 'image/png' ? 'photo.png' : 'photo.jpg',
         } as any)
-        await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000'}/outage-reports/${data.id}/image`,
-          { method: 'POST', body: formData }
-        )
+        const { error: imgError } = await apiClient.POST('/outage-reports/{report_id}/image', {
+          params: { path: { report_id: data.id } },
+          body: formData as any,
+        })
+        if (imgError) throw new Error(`Image upload failed: ${JSON.stringify(imgError)}`)
       }
       navigation.replace('Success')
-    } catch {
-      Alert.alert('Error', 'Something went wrong. Please try again.')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      Alert.alert('Error', msg)
       setSubmitting(false)
     }
   }
