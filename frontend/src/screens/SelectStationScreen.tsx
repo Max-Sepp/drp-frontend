@@ -23,7 +23,7 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
   return (
     <YStack flex={1} style={{ backgroundColor: 'white' }}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
-        <YStack style={{ height: 56, justifyContent: 'center' }} px="$5">
+        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
           <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={18} color="#2563eb" />
             <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
