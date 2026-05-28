@@ -1,3 +1,4 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { Image, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -35,10 +36,10 @@ function alertLabel(report: OutageReport) {
 }
 
 const GRID_ITEMS = [
-  { label: 'Lift\nBroken', route: 'ReportForm' as const, equipmentType: 'lift' as const },
-  { label: 'Escalator\nBroken', route: 'ReportForm' as const, equipmentType: 'escalator' as const },
-  { label: 'Overcrowding', disabled: true },
-  { label: 'Custom\nIssue', route: 'ReportCustom' as const },
+  { label: 'Lift\nBroken', icon: 'elevator' as const, route: 'ReportForm' as const, equipmentType: 'lift' as const },
+  { label: 'Escalator\nBroken', icon: 'escalator' as const, route: 'ReportForm' as const, equipmentType: 'escalator' as const },
+  { label: 'Overcrowding', icon: 'groups' as const, disabled: true },
+  { label: 'Custom\nIssue', icon: 'edit-note' as const, route: 'ReportCustom' as const },
 ] as const
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
@@ -150,7 +151,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               onPress={disabled ? undefined : () => gridPress(item)}
               style={{ aspectRatio: 1.3, borderWidth: 1.5, borderColor: '#d1d5db', borderRadius: 10, backgroundColor: 'white' }}
             >
-              <YStack flex={1} items="center" justify="center">
+              <YStack flex={1} items="center" justify="center" gap="$1.5">
+                <MaterialIcons name={item.icon} size={40} color={disabled ? '#9ca3af' : '#111827'} />
                 <Text
                   fontSize={15}
                   fontWeight="600"
