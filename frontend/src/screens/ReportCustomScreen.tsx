@@ -13,11 +13,28 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
   const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null)
 
   async function pickPhoto() {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-    })
-    if (!result.canceled) setPhoto(result.assets[0])
+    Alert.alert('Attach photo', undefined, [
+      {
+        text: 'Take photo',
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync()
+          if (status !== 'granted') {
+            Alert.alert('Permission required', 'Camera access is needed to take a photo.')
+            return
+          }
+          const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 })
+          if (!result.canceled) setPhoto(result.assets[0])
+        },
+      },
+      {
+        text: 'Choose from library',
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 })
+          if (!result.canceled) setPhoto(result.assets[0])
+        },
+      },
+      { text: 'Cancel', style: 'cancel' },
+    ])
   }
 
   function submit() {

@@ -7,7 +7,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.drpmobility.app"
+      "bundleIdentifier": "com.drpmobility.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to take a photo of the broken equipment when reporting an issue."
+      }
     },
     "android": {
       "package": "com.drpmobility.app"
