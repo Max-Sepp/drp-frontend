@@ -180,7 +180,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                   fontWeight="600"
                   color="#111827"
                   lineHeight={20}
-                  style={{ textAlign: 'center', textDecorationLine: disabled ? 'none' : 'underline' }}
+                  style={{ textAlign: 'center' }}
                 >
                   {item.label}
                 </Text>
