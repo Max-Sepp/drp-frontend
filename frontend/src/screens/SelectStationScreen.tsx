@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useState } from 'react'
-import { FlatList } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useEffect, useState } from 'react'
+import { FlatList, Keyboard } from 'react-native'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Input, Separator, Text, XStack, YStack } from 'tamagui'
 import { STATIONS } from '../constants/stations'
 import { stationPicker } from '../navigation/stationPicker'
@@ -10,6 +10,17 @@ import type { SelectStationScreenProps, Station } from '../navigation/types'
 export default function SelectStationScreen({ navigation, route }: SelectStationScreenProps) {
   const { currentStation } = route.params
   const [query, setQuery] = useState('')
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const insets = useSafeAreaInsets()
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', e => setKeyboardHeight(e.endCoordinates.height))
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0))
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
 
   const filtered = STATIONS.filter(s =>
     s.name.toLowerCase().includes(query.toLowerCase())
@@ -69,7 +80,7 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
         }}
       />
 
-      <YStack style={{ borderTopWidth: 1, borderColor: '#e5e7eb' }} px="$4" py="$2.5">
+      <YStack px="$4" pt="$2.5" style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingBottom: keyboardHeight > 0 ? 10 : (insets.bottom || 10), marginBottom: keyboardHeight > 0 ? keyboardHeight + insets.bottom : 0 }}>
         <Input
           value={query}
           onChangeText={setQuery}
