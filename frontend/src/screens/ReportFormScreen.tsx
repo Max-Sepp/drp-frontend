@@ -6,12 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView, Spinner, TextArea, Text, XStack, YStack } from 'tamagui'
 import { apiClient } from '../api/client'
 import { ESCALATOR_CONNECTIONS, LIFT_CONNECTIONS } from '../constants/stations'
-import { stationPicker } from '../navigation/stationPicker'
 import type { ReportFormScreenProps, Station } from '../navigation/types'
 
 export default function ReportFormScreen({ navigation, route }: ReportFormScreenProps) {
   const [equipmentType] = useState(route.params.equipmentType)
-  const [station, setStation] = useState<Station>(route.params.station)
+  const [station] = useState<Station>(route.params.station)
   const [connection, setConnection] = useState<string | null>(null)
   const [description, setDescription] = useState('')
   const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null)
@@ -113,24 +112,6 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
           <Text fontSize={22} fontWeight="700" color="#1a1a1a">{title}</Text>
         </YStack>
       </SafeAreaView>
-
-      {/* Station picker */}
-      <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">station</Text>
-        <XStack
-          items="center"
-          justify="space-between"
-          pressStyle={{ opacity: 0.7 }}
-          onPress={() => {
-            stationPicker.register(setStation)
-            navigation.navigate('SelectStation', { currentStation: station })
-          }}
-          style={{ borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#f9fafb' }}
-        >
-          <Text fontSize={15} color="#111827">{station}</Text>
-          <Text fontSize={13} color="#6b7280">v</Text>
-        </XStack>
-      </YStack>
 
       {/* Connection picker */}
       <YStack px="$5" mt="$5">
