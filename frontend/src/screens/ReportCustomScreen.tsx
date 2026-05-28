@@ -1,16 +1,8 @@
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
-import {
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { Alert, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { Input, ScrollView, TextArea, Text, XStack, YStack } from 'tamagui'
 import { stationPicker } from '../navigation/stationPicker'
 import type { ReportCustomScreenProps, Station } from '../navigation/types'
 
@@ -37,135 +29,89 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.back}>{'< back'}</Text>
-          </Pressable>
-          <Text style={styles.title}>Describe the issue</Text>
-        </View>
+    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
+        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
+          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
+            {'< back'}
+          </Text>
+          <Text fontSize={22} fontWeight="700" color="#1a1a1a">Describe the issue</Text>
+        </YStack>
       </SafeAreaView>
 
       {/* Description */}
-      <View style={styles.section}>
-        <Text style={styles.label}>issue description</Text>
-        <TextInput
-          style={styles.textArea}
-          placeholder="e.g. fallen light blocking path to escalator"
-          placeholderTextColor="#9ca3af"
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">issue description</Text>
+        <TextArea
           value={description}
           onChangeText={setDescription}
-          multiline
+          placeholder="e.g. fallen light blocking path to escalator"
+          placeholderTextColor="$gray9"
           numberOfLines={4}
+          style={{ minHeight: 100, borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
-      </View>
+      </YStack>
 
-      {/* Station */}
-      <View style={styles.section}>
-        <Text style={styles.label}>station</Text>
-        <Pressable
-          style={styles.dropdown}
+      {/* Station picker */}
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">station</Text>
+        <XStack
+          items="center"
+          justify="space-between"
+          pressStyle={{ opacity: 0.7 }}
           onPress={() => {
             stationPicker.register(setStation)
             navigation.navigate('SelectStation', { currentStation: station })
           }}
+          style={{ borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#f9fafb' }}
         >
-          <Text style={styles.dropdownText}>{station}</Text>
-          <Text style={styles.dropdownChevron}>v</Text>
-        </Pressable>
-      </View>
+          <Text fontSize={15} color="#111827">{station}</Text>
+          <Text fontSize={13} color="#6b7280">v</Text>
+        </XStack>
+      </YStack>
 
       {/* Area */}
-      <View style={styles.section}>
-        <Text style={styles.label}>area within station (optional)</Text>
-        <TextInput
-          style={styles.dropdown}
-          placeholder="-- select --"
-          placeholderTextColor="#9ca3af"
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">area within station (optional)</Text>
+        <Input
           value={area}
           onChangeText={setArea}
+          placeholder="-- select --"
+          placeholderTextColor="$gray9"
+          style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
-      </View>
+      </YStack>
 
       {/* Photo */}
-      <View style={styles.section}>
-        <Text style={styles.label}>attach photo (optional)</Text>
-        <Pressable style={styles.photoBox} onPress={pickPhoto}>
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">attach photo (optional)</Text>
+        <YStack
+          items="center"
+          justify="center"
+          pressStyle={{ opacity: 0.7 }}
+          onPress={pickPhoto}
+          style={{ borderWidth: 2, borderColor: '#9ca3af', borderStyle: 'dashed', borderRadius: 8, height: 100, overflow: 'hidden' }}
+        >
           {photo ? (
-            <Image source={{ uri: photo.uri }} style={styles.photoPreview} />
+            <Image source={{ uri: photo.uri }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
           ) : (
-            <Text style={styles.photoPlaceholder}>[ + ]  tap to upload image</Text>
+            <Text fontSize={14} color="#9ca3af">[ + ]  tap to upload image</Text>
           )}
-        </Pressable>
-      </View>
+        </YStack>
+      </YStack>
 
-      <Pressable style={styles.submitBtn} onPress={submit}>
-        <Text style={styles.submitText}>Submit</Text>
-      </Pressable>
+      {/* Submit */}
+      <YStack
+        mx="$5"
+        mt="$8"
+        items="center"
+        justify="center"
+        pressStyle={{ opacity: 0.8 }}
+        onPress={submit}
+        style={{ backgroundColor: '#111827', borderRadius: 10, height: 52 }}
+      >
+        <Text color="white" fontSize={16} fontWeight="700">Submit</Text>
+      </YStack>
     </ScrollView>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { paddingBottom: 48 },
-  headerSafeArea: {
-    backgroundColor: '#dbeafe',
-  },
-  header: {
-    height: 72,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    gap: 4,
-  },
-  back: { fontSize: 14, color: '#2563eb', marginBottom: 8 },
-  title: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  section: { paddingHorizontal: 20, marginTop: 20 },
-  label: { fontSize: 12, fontWeight: '600', color: '#6b7280', marginBottom: 8 },
-  textArea: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#f9fafb',
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  dropdownText: { fontSize: 15, color: '#111827' },
-  dropdownChevron: { fontSize: 13, color: '#6b7280' },
-  photoBox: {
-    borderWidth: 2,
-    borderColor: '#9ca3af',
-    borderStyle: 'dashed',
-    borderRadius: 8,
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  photoPlaceholder: { fontSize: 14, color: '#9ca3af' },
-  photoPreview: { width: '100%', height: '100%', resizeMode: 'cover' },
-  submitBtn: {
-    marginHorizontal: 20,
-    marginTop: 32,
-    backgroundColor: '#111827',
-    borderRadius: 10,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-})

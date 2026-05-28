@@ -1,17 +1,8 @@
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { Alert, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { ScrollView, Spinner, TextArea, Text, XStack, YStack } from 'tamagui'
 import { apiClient } from '../api/client'
 import { ESCALATOR_CONNECTIONS, LIFT_CONNECTIONS } from '../constants/stations'
 import { stationPicker } from '../navigation/stationPicker'
@@ -78,169 +69,117 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.back}>{'< back'}</Text>
-          </Pressable>
-          <Text style={styles.title}>{title}</Text>
-        </View>
+    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
+        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
+          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
+            {'< back'}
+          </Text>
+          <Text fontSize={22} fontWeight="700" color="#1a1a1a">{title}</Text>
+        </YStack>
       </SafeAreaView>
 
-      {/* Station */}
-      <View style={styles.section}>
-        <Text style={styles.label}>station</Text>
-        <Pressable
-          style={styles.dropdown}
+      {/* Station picker */}
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">station</Text>
+        <XStack
+          items="center"
+          justify="space-between"
+          pressStyle={{ opacity: 0.7 }}
           onPress={() => {
             stationPicker.register(setStation)
             navigation.navigate('SelectStation', { currentStation: station })
           }}
+          style={{ borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#f9fafb' }}
         >
-          <Text style={styles.dropdownText}>{station}</Text>
-          <Text style={styles.dropdownChevron}>v</Text>
-        </Pressable>
-      </View>
+          <Text fontSize={15} color="#111827">{station}</Text>
+          <Text fontSize={13} color="#6b7280">v</Text>
+        </XStack>
+      </YStack>
 
       {/* Connection picker */}
-      <View style={styles.section}>
-        <Text style={styles.label}>{which}</Text>
-        {connections.map(c => (
-          <Pressable
-            key={c}
-            style={[styles.checkRow, connection === c && styles.checkRowSelected]}
-            onPress={() => setConnection(c)}
-          >
-            <View style={[styles.checkbox, connection === c && styles.checkboxSelected]}>
-              {connection === c && <Text style={styles.checkboxTick}>✕</Text>}
-            </View>
-            <Text style={styles.checkLabel}>{equipmentType} to {c}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">{which}</Text>
+        {connections.map(c => {
+          const selected = connection === c
+          return (
+            <XStack
+              key={c}
+              items="center"
+              gap="$3"
+              pressStyle={{ opacity: 0.7 }}
+              onPress={() => setConnection(c)}
+              mb="$2"
+              style={{
+                paddingVertical: 12, paddingHorizontal: 14,
+                borderWidth: 1, borderColor: selected ? '#2d6a4f' : '#e5e7eb',
+                borderRadius: 8, backgroundColor: selected ? '#f0fdf4' : 'white',
+              }}
+            >
+              <YStack
+                style={{
+                  width: 22, height: 22, borderRadius: 4, borderWidth: 2,
+                  borderColor: selected ? '#2d6a4f' : '#9ca3af',
+                  backgroundColor: selected ? '#2d6a4f' : 'transparent',
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {selected && <Text color="white" fontSize={12} fontWeight="700">✕</Text>}
+              </YStack>
+              <Text fontSize={15} color="#111827">{equipmentType} to {c}</Text>
+            </XStack>
+          )
+        })}
+      </YStack>
 
       {/* Photo */}
-      <View style={styles.section}>
-        <Text style={styles.label}>attach photo (optional)</Text>
-        <Pressable style={styles.photoBox} onPress={pickPhoto}>
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">attach photo (optional)</Text>
+        <YStack
+          items="center"
+          justify="center"
+          pressStyle={{ opacity: 0.7 }}
+          onPress={pickPhoto}
+          style={{ borderWidth: 2, borderColor: '#9ca3af', borderStyle: 'dashed', borderRadius: 8, height: 100, overflow: 'hidden' }}
+        >
           {photo ? (
-            <Image source={{ uri: photo.uri }} style={styles.photoPreview} />
+            <Image source={{ uri: photo.uri }} style={{ width: '100%', height: '100%', resizeMode: 'cover' }} />
           ) : (
-            <Text style={styles.photoPlaceholder}>[ + ]  tap to upload image</Text>
+            <Text fontSize={14} color="#9ca3af">[ + ]  tap to upload image</Text>
           )}
-        </Pressable>
-      </View>
+        </YStack>
+      </YStack>
 
       {/* Description */}
-      <View style={styles.section}>
-        <Text style={styles.label}>further comments (optional)</Text>
-        <TextInput
-          style={styles.textArea}
-          placeholder="e.g. doors won't open..."
-          placeholderTextColor="#9ca3af"
+      <YStack px="$5" mt="$5">
+        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2" textTransform="lowercase">further comments (optional)</Text>
+        <TextArea
           value={description}
           onChangeText={setDescription}
-          multiline
+          placeholder="e.g. doors won't open..."
+          placeholderTextColor="$gray9"
           numberOfLines={3}
+          style={{ minHeight: 80, borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
-      </View>
+      </YStack>
 
-      <Pressable style={[styles.submitBtn, submitting && styles.submitBtnDisabled]} onPress={submit} disabled={submitting}>
+      {/* Submit */}
+      <YStack
+        mx="$5"
+        mt="$8"
+        items="center"
+        justify="center"
+        pressStyle={{ opacity: 0.8 }}
+        onPress={submitting ? undefined : submit}
+        opacity={submitting ? 0.6 : 1}
+        style={{ backgroundColor: '#111827', borderRadius: 10, height: 52 }}
+      >
         {submitting ? (
-          <ActivityIndicator color="#fff" />
+          <Spinner color="white" />
         ) : (
-          <Text style={styles.submitText}>Submit</Text>
+          <Text color="white" fontSize={16} fontWeight="700">Submit</Text>
         )}
-      </Pressable>
+      </YStack>
     </ScrollView>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { paddingBottom: 48 },
-  headerSafeArea: {
-    backgroundColor: '#dbeafe',
-  },
-  header: {
-    height: 72,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    gap: 4,
-  },
-  back: { fontSize: 14, color: '#2563eb', marginBottom: 8 },
-  title: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  section: { paddingHorizontal: 20, marginTop: 20 },
-  label: { fontSize: 12, fontWeight: '600', color: '#6b7280', marginBottom: 8, textTransform: 'lowercase' },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-  },
-  dropdownText: { fontSize: 15, color: '#111827' },
-  dropdownChevron: { fontSize: 13, color: '#6b7280' },
-  checkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  checkRowSelected: { backgroundColor: '#f0fdf4', borderColor: '#2d6a4f' },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderWidth: 2,
-    borderColor: '#9ca3af',
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxSelected: { backgroundColor: '#2d6a4f', borderColor: '#2d6a4f' },
-  checkboxTick: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  checkLabel: { fontSize: 15, color: '#111827' },
-  photoBox: {
-    borderWidth: 2,
-    borderColor: '#9ca3af',
-    borderStyle: 'dashed',
-    borderRadius: 8,
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  photoPlaceholder: { fontSize: 14, color: '#9ca3af' },
-  photoPreview: { width: '100%', height: '100%', resizeMode: 'cover' },
-  textArea: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#f9fafb',
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  submitBtn: {
-    marginHorizontal: 20,
-    marginTop: 32,
-    backgroundColor: '#111827',
-    borderRadius: 10,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-})

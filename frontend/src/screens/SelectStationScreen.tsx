@@ -1,15 +1,9 @@
 import { useState } from 'react'
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { FlatList } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { stationPicker } from '../navigation/stationPicker'
+import { Input, Separator, Text, XStack, YStack } from 'tamagui'
 import { STATIONS } from '../constants/stations'
+import { stationPicker } from '../navigation/stationPicker'
 import type { SelectStationScreenProps, Station } from '../navigation/types'
 
 export default function SelectStationScreen({ navigation, route }: SelectStationScreenProps) {
@@ -26,96 +20,64 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
   }
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.back}>{'< back'}</Text>
-          </Pressable>
-          <Text style={styles.title}>Select station</Text>
-        </View>
+    <YStack flex={1} style={{ backgroundColor: 'white' }}>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
+        <YStack style={{ height: 56, justifyContent: 'center' }} px="$5">
+          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
+            {'< back'}
+          </Text>
+          <Text fontSize={22} fontWeight="700" color="#1a1a1a">Select station</Text>
+        </YStack>
       </SafeAreaView>
 
       <FlatList
         data={filtered}
         keyExtractor={item => item.name}
+        ItemSeparatorComponent={() => (
+          <Separator style={{ marginLeft: 58 }} borderColor="$borderColor" />
+        )}
         renderItem={({ item }) => {
           const selected = item.name === currentStation
           return (
-            <Pressable
-              style={[styles.row, selected && styles.rowSelected]}
-              onPress={() => select(item.name)}
+            <XStack
+              items="center"
+              py="$4"
+              px="$5"
+              gap="$3.5"
+              pressStyle={{ opacity: 0.7 }}
+              onPress={() => select(item.name as Station)}
+              style={{ backgroundColor: selected ? '#f0fdf4' : 'white' }}
             >
-              <View style={[styles.radio, selected && styles.radioSelected]}>
-                {selected && <Text style={styles.radioTick}>✓</Text>}
-              </View>
-              <View>
-                <Text style={styles.stationName}>{item.name}</Text>
-                <Text style={styles.lines}>{item.lines.join(', ')}</Text>
-              </View>
-            </Pressable>
+              <YStack
+                style={{
+                  width: 24, height: 24, borderRadius: 12, borderWidth: 2,
+                  borderColor: selected ? '#2d6a4f' : '#9ca3af',
+                  backgroundColor: selected ? '#2d6a4f' : 'transparent',
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {selected && <Text color="white" fontSize={13} fontWeight="700">✓</Text>}
+              </YStack>
+              <YStack>
+                <Text fontSize={16} fontWeight="600" color="#111827">{item.name}</Text>
+                <Text fontSize={13} color="#6b7280" mt="$1">{item.lines.join(', ')}</Text>
+              </YStack>
+            </XStack>
           )
         }}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.search}
-          placeholder="search stations..."
-          placeholderTextColor="#9ca3af"
+      <YStack style={{ borderTopWidth: 1, borderColor: '#e5e7eb' }} px="$4" py="$2.5">
+        <Input
           value={query}
           onChangeText={setQuery}
+          placeholder="search stations..."
+          placeholderTextColor="$gray9"
           autoCorrect={false}
+          size="$4"
+          style={{ borderWidth: 0, backgroundColor: 'transparent', color: '#111827' }}
         />
-      </View>
-    </View>
+      </YStack>
+    </YStack>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  headerSafeArea: {
-    backgroundColor: '#dbeafe',
-  },
-  header: {
-    height: 56,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  back: { fontSize: 14, color: '#2563eb', marginBottom: 8 },
-  title: { fontSize: 22, fontWeight: '700', color: '#1a1a1a' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    gap: 14,
-  },
-  rowSelected: { backgroundColor: '#f0fdf4' },
-  radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#9ca3af',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioSelected: { borderColor: '#2d6a4f', backgroundColor: '#2d6a4f' },
-  radioTick: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  stationName: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  lines: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  separator: { height: 1, backgroundColor: '#e5e7eb', marginLeft: 58 },
-  searchContainer: {
-    borderTopWidth: 1,
-    borderColor: '#e5e7eb',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  search: {
-    fontSize: 15,
-    color: '#111827',
-    paddingVertical: 8,
-  },
-})

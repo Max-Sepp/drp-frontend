@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, YStack } from 'tamagui'
 import type { SuccessScreenProps } from '../navigation/types'
 
 export default function SuccessScreen({ navigation }: SuccessScreenProps) {
@@ -11,40 +11,15 @@ export default function SuccessScreen({ navigation }: SuccessScreenProps) {
   }, [navigation])
 
   return (
-    <View style={styles.container}>
-      <View style={styles.circle}>
-        <Text style={styles.check}>✓</Text>
-      </View>
-      <Text style={styles.label}>Submitted</Text>
-    </View>
+    <YStack flex={1} items="center" justify="center" gap="$5" style={{ backgroundColor: 'white' }}>
+      <YStack
+        items="center"
+        justify="center"
+        style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#2d6a4f', backgroundColor: '#d8f3dc' }}
+      >
+        <Text fontSize={52} color="#2d6a4f">✓</Text>
+      </YStack>
+      <Text fontSize={22} fontWeight="700" color="#1a1a1a">Submitted</Text>
+    </YStack>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-  },
-  circle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: '#2d6a4f',
-    backgroundColor: '#d8f3dc',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  check: {
-    fontSize: 52,
-    color: '#2d6a4f',
-  },
-  label: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-})
