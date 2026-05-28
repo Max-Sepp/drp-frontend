@@ -1,0 +1,26 @@
+import type { Station } from '../navigation/types'
+
+export const STATIONS: { name: Station; lines: string[] }[] = [
+  { name: "King's Cross", lines: ['Circle', 'Hammersmith & City', 'Metropolitan', 'Northern', 'Piccadilly', 'Victoria'] },
+  { name: 'London Bridge', lines: ['Jubilee', 'Northern'] },
+  { name: 'Paddington', lines: ['Bakerloo', 'Circle', 'District', 'Hammersmith & City'] },
+  { name: 'Victoria', lines: ['Circle', 'District', 'Victoria'] },
+  { name: 'Waterloo', lines: ['Bakerloo', 'Jubilee', 'Northern', 'Waterloo & City'] },
+]
+
+export const LIFT_CONNECTIONS = [
+  'street entrance',
+  'platform 1',
+  'platform 2',
+  'platform 3',
+  'car park',
+]
+
+export const ESCALATOR_CONNECTIONS = [
+  'street entrance',
+  'platform 1',
+  'platform 2',
+  'concourse',
+]
+
+export const DEFAULT_STATION: Station = 'Victoria'
