@@ -16,3 +16,6 @@ Thumbs.db
 .env.*.local
 
 .claude
+
+# Other
+temp/
