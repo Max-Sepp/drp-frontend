@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, Image, Pressable } from 'react-native'
+import { Image, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView, Spinner, Text, XStack, YStack } from 'tamagui'
 import { apiClient, BASE_URL } from '../api/client'
@@ -45,8 +45,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [station, setStation] = useState<Station>(DEFAULT_STATION)
   const [reports, setReports] = useState<OutageReport[]>([])
   const [loading, setLoading] = useState(false)
-  const [expandedId, setExpandedId] = useState<number | null>(null)
-
   const fetchReports = useCallback(async () => {
     setLoading(true)
     const { data } = await apiClient.GET('/outage-reports')
@@ -60,15 +58,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return unsub
   }, [fetchReports, navigation])
 
-  async function deleteReport(id: number) {
-    const { error } = await apiClient.DELETE('/outage-reports/{report_id}', { params: { path: { report_id: id } } })
-    if (error) {
-      Alert.alert('Error', 'Failed to delete report. Please try again.')
-      return
-    }
-    setReports(prev => prev.filter(r => r.id !== id))
-    setExpandedId(null)
-  }
 
   function gridPress(item: typeof GRID_ITEMS[number]) {
     if ('disabled' in item) return
@@ -114,47 +103,34 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       ) : (
         <YStack mx="$4" mt="$3" gap="$2">
           {reports.map(r => {
-            const expanded = expandedId === r.id
             return (
-              <Pressable key={r.id} onPress={() => setExpandedId(expanded ? null : r.id)}>
-                <YStack style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
-                  <XStack p="$4" items="center" gap="$3">
-                    <YStack style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#b91c1c', alignItems: 'center', justifyContent: 'center' }}>
-                      <Text color="white" fontWeight="700" fontSize={18}>!</Text>
-                    </YStack>
-                    <YStack flex={1}>
-                      <Text fontSize={14} fontWeight="700" color="#7f1d1d">{alertLabel(r)}</Text>
-                      <Text fontSize={12} color="#991b1b" mt="$1">
-                        reported at {formatTime(r.breakdown_time)}{isToday(r.breakdown_time) ? ' today' : ''}
-                      </Text>
-                    </YStack>
-                    <Text fontSize={12} color="#991b1b">{expanded ? '▲' : '▼'}</Text>
-                  </XStack>
-                  {expanded && (
-                    <YStack px="$4" pb="$4" gap="$3">
-                      {r.description ? (
-                        <Text fontSize={13} color="#7f1d1d">{r.description}</Text>
-                      ) : null}
-                      {r.image_content_type ? (
-                        <Image
-                          source={{ uri: `${BASE_URL}/outage-reports/${r.id}/image` }}
-                          style={{ width: '100%', height: 180, borderRadius: 8 }}
-                          resizeMode="cover"
-                        />
-                      ) : null}
-                      <YStack
-                        items="center"
-                        justify="center"
-                        pressStyle={{ opacity: 0.7 }}
-                        onPress={() => deleteReport(r.id)}
-                        style={{ backgroundColor: '#b91c1c', borderRadius: 8, height: 38 }}
-                      >
-                        <Text color="white" fontSize={14} fontWeight="600">Delete report</Text>
-                      </YStack>
-                    </YStack>
-                  )}
-                </YStack>
-              </Pressable>
+              <YStack key={r.id} style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
+                <XStack p="$4" items="center" gap="$3">
+                  <YStack style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#b91c1c', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text color="white" fontWeight="700" fontSize={18}>!</Text>
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text fontSize={14} fontWeight="700" color="#7f1d1d">{alertLabel(r)}</Text>
+                    <Text fontSize={12} color="#991b1b" mt="$1">
+                      reported at {formatTime(r.breakdown_time)}{isToday(r.breakdown_time) ? ' today' : ''}
+                    </Text>
+                  </YStack>
+                </XStack>
+                {(r.description || r.image_content_type) && (
+                  <YStack px="$4" pb="$4" gap="$3">
+                    {r.description ? (
+                      <Text fontSize={13} color="#7f1d1d">{r.description}</Text>
+                    ) : null}
+                    {r.image_content_type ? (
+                      <Image
+                        source={{ uri: `${BASE_URL}/outage-reports/${r.id}/image` }}
+                        style={{ width: '100%', height: 180, borderRadius: 8 }}
+                        resizeMode="cover"
+                      />
+                    ) : null}
+                  </YStack>
+                )}
+              </YStack>
             )
           })}
         </YStack>
