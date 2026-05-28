@@ -10,13 +10,20 @@ import type { HomeScreenProps, Station } from '../navigation/types'
 
 type OutageReport = components['schemas']['OutageReportSummary']
 
+function parseUtc(iso: string): Date {
+  // Append Z if no timezone designator so it's always parsed as UTC
+  const hasTimezoneDesignator = /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(iso)
+  const normalized = hasTimezoneDesignator ? iso : iso + 'Z'
+  return new Date(normalized)
+}
+
 function formatTime(iso: string) {
-  const d = new Date(iso)
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  const d = parseUtc(iso)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 function isToday(iso: string) {
-  const d = new Date(iso)
+  const d = parseUtc(iso)
   const now = new Date()
   return d.toDateString() === now.toDateString()
 }
