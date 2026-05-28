@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Image, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, ScrollView, Spinner, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Spinner, Text, XStack, YStack } from 'tamagui'
 import { apiClient, BASE_URL } from '../api/client'
 import type { components } from '../api/schema.d'
 import { DEFAULT_STATION } from '../constants/stations'
@@ -138,15 +138,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                           resizeMode="cover"
                         />
                       ) : null}
-                      <Button
-                        size="$3"
-                        backgroundColor="#b91c1c"
-                        color="white"
-                        borderRadius={8}
+                      <YStack
+                        items="center"
+                        justify="center"
+                        pressStyle={{ opacity: 0.7 }}
                         onPress={() => deleteReport(r.id)}
+                        style={{ backgroundColor: '#b91c1c', borderRadius: 8, height: 38 }}
                       >
-                        Delete report
-                      </Button>
+                        <Text color="white" fontSize={14} fontWeight="600">Delete report</Text>
+                      </YStack>
                     </YStack>
                   )}
                 </YStack>
