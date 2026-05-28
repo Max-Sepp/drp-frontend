@@ -45,10 +45,22 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
     ])
   }
 
+  const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
   async function submit() {
     if (!connection) {
       Alert.alert('Required', `Please select which ${equipmentType} is broken.`)
       return
+    }
+    if (photo) {
+      const mimeType = photo.mimeType || ''
+      if (!ALLOWED_MIME.has(mimeType)) {
+        Alert.alert(
+          'Unsupported image format',
+          `Please choose a JPEG, PNG, WebP, or GIF image. (Detected: ${mimeType || 'unknown'})`,
+        )
+        return
+      }
     }
     setSubmitting(true)
     try {
@@ -67,9 +79,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
         return
       }
       if (photo) {
-        const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-        const rawType = photo.mimeType || 'image/jpeg'
-        const mimeType = ALLOWED.has(rawType) ? rawType : 'image/jpeg'
+        const mimeType = photo.mimeType!
         const formData = new FormData()
         formData.append('file', {
           uri: photo.uri,
