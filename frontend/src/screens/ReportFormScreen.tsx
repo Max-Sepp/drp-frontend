@@ -101,8 +101,8 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'white' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 16 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
         <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
           <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
@@ -180,10 +180,11 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
         />
       </YStack>
 
-      {/* Submit */}
+    </ScrollView>
+    <SafeAreaView edges={['bottom']} style={{ backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
       <YStack
         mx="$5"
-        mt="$8"
+        my="$3"
         items="center"
         justify="center"
         pressStyle={{ opacity: 0.8 }}
@@ -197,7 +198,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
           <Text color="white" fontSize={16} fontWeight="700">Submit</Text>
         )}
       </YStack>
-    </ScrollView>
+    </SafeAreaView>
     </KeyboardAvoidingView>
   )
 }
