@@ -139,7 +139,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Quick report grid */}
       <Text fontSize={13} fontWeight="600" color="#374151" mt="$6" mb="$2" mx="$4">Quick report</Text>
-      <XStack flexWrap="wrap" mx="$4" gap="$2.5">
+      <XStack flexWrap="wrap" mx="$4" gap="$2.5" justify="center">
         {GRID_ITEMS.map(item => {
           const disabled = 'disabled' in item
           return (
