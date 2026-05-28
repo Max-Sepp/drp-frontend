@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Image, Pressable } from 'react-native'
+import { Alert, Image, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView, Spinner, Text, XStack, YStack } from 'tamagui'
 import { apiClient, BASE_URL } from '../api/client'
@@ -61,7 +61,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [fetchReports, navigation])
 
   async function deleteReport(id: number) {
-    await apiClient.DELETE('/outage-reports/{report_id}', { params: { path: { report_id: id } } })
+    const { error } = await apiClient.DELETE('/outage-reports/{report_id}', { params: { path: { report_id: id } } })
+    if (error) {
+      Alert.alert('Error', 'Failed to delete report. Please try again.')
+      return
+    }
     setReports(prev => prev.filter(r => r.id !== id))
     setExpandedId(null)
   }
