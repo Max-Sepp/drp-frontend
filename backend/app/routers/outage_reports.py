@@ -1,5 +1,9 @@
+import io
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import Response
+from PIL import Image, UnidentifiedImageError
 
 from app.repositories.outage_report import OutageReportRepository, get_repo
 from app.schemas.outage_report import OutageReportCreate, OutageReportSummary
@@ -7,6 +11,47 @@ from app.schemas.outage_report import OutageReportCreate, OutageReportSummary
 router = APIRouter(prefix="/outage-reports", tags=["outage-reports"])
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+_EXT_TO_MIME = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+}
+
+_MAX_DIMENSION = 1024
+_JPEG_QUALITY = 75
+
+
+def _resolve_content_type(file: UploadFile) -> str:
+    """Return the MIME type for *file*, falling back to filename extension."""
+    ct = (file.content_type or "").lower().split(";")[0].strip()
+    if ct in _ALLOWED_IMAGE_TYPES:
+        return ct
+    # React Native FormData sometimes omits or sends a generic content-type;
+    # fall back to the filename extension so uploads still work.
+    if file.filename:
+        ext = os.path.splitext(file.filename)[1].lower()
+        inferred = _EXT_TO_MIME.get(ext, "")
+        if inferred:
+            return inferred
+    return ct
+
+
+def _compress(data: bytes) -> bytes:
+    """Resize to fit within _MAX_DIMENSION and re-encode as JPEG."""
+    try:
+        img = Image.open(io.BytesIO(data))
+    except UnidentifiedImageError:
+        raise HTTPException(status_code=422, detail="Could not decode image.")
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    if img.width > _MAX_DIMENSION or img.height > _MAX_DIMENSION:
+        img.thumbnail((_MAX_DIMENSION, _MAX_DIMENSION), Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=_JPEG_QUALITY, optimize=True)
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +122,7 @@ async def upload_image(
     if report is None:
         raise HTTPException(status_code=404, detail="Outage report not found")
 
-    content_type = file.content_type or ""
+    content_type = _resolve_content_type(file)
     if content_type not in _ALLOWED_IMAGE_TYPES:
         raise HTTPException(
             status_code=415,
@@ -85,7 +130,8 @@ async def upload_image(
             f"Allowed: {', '.join(sorted(_ALLOWED_IMAGE_TYPES))}",
         )
 
-    return repo.set_image(report, await file.read(), content_type)
+    compressed = _compress(await file.read())
+    return repo.set_image(report, compressed, "image/jpeg")
 
 
 @router.get("/{report_id}/image")
