@@ -12,7 +12,8 @@ type OutageReport = components['schemas']['OutageReportSummary']
 
 function parseUtc(iso: string): Date {
   // Append Z if no timezone designator so it's always parsed as UTC
-  const normalized = iso.endsWith('Z') || iso.includes('+') ? iso : iso + 'Z'
+  const hasTimezoneDesignator = /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(iso)
+  const normalized = hasTimezoneDesignator ? iso : iso + 'Z'
   return new Date(normalized)
 }
 
