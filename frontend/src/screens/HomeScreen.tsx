@@ -101,8 +101,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Status */}
       {loading ? (
-        <YStack mx="$4" mt="$3" p="$5" items="center" style={{ backgroundColor: '#d8f3dc', borderRadius: 10 }}>
-          <Spinner color="#2d6a4f" />
+        <YStack mx="$4" mt="$3" p="$5" items="center" style={{ backgroundColor: '#f3f4f6', borderRadius: 10 }}>
+          <Spinner color="#9ca3af" />
         </YStack>
       ) : reports.length === 0 ? (
         <YStack mx="$4" mt="$3" p="$5" items="center" gap="$3" style={{ backgroundColor: '#d8f3dc', borderRadius: 10 }}>
