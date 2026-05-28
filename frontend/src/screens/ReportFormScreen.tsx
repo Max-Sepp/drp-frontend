@@ -159,7 +159,7 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
               >
                 {selected && <Text color="white" fontSize={12} fontWeight="700">✕</Text>}
               </YStack>
-              <Text fontSize={15} color="#111827">{equipmentType} to {c}</Text>
+              <Text fontSize={15} color="#111827">{c}</Text>
             </XStack>
           )
         })}
