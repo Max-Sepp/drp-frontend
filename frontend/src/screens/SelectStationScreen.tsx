@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import { FlatList } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -23,9 +24,10 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
     <YStack flex={1} style={{ backgroundColor: 'white' }}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
         <YStack style={{ height: 56, justifyContent: 'center' }} px="$5">
-          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
-            {'< back'}
-          </Text>
+          <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={18} color="#2563eb" />
+            <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
+          </XStack>
           <Text fontSize={22} fontWeight="700" color="#1a1a1a">Select station</Text>
         </YStack>
       </SafeAreaView>

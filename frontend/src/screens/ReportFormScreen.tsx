@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native'
@@ -105,9 +106,10 @@ export default function ReportFormScreen({ navigation, route }: ReportFormScreen
     <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
         <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
-          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
-            {'< back'}
-          </Text>
+          <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={18} color="#2563eb" />
+            <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
+          </XStack>
           <Text fontSize={22} fontWeight="700" color="#1a1a1a">{title}</Text>
         </YStack>
       </SafeAreaView>
