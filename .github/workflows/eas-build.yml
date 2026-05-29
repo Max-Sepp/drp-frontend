@@ -57,36 +57,3 @@ jobs:
           echo "android-build-id=$ANDROID_ID" >> "$GITHUB_OUTPUT"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-  release:
-    needs: build
-    if: needs.build.outputs.android-build-id != ''
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Get APK download URL
-        id: apk
-        working-directory: frontend
-        run: |
-          URL=$(npx eas-cli@19.1.0 build:view ${{ needs.build.outputs.android-build-id }} \
-            --json \
-            --non-interactive | jq -r '.artifacts.applicationArchiveUrl')
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Create GitHub Release
-        run: |
-          TAG=${{ github.ref_name }}
-          cat > release-notes.md <<EOF
-          ### Downloads
-          **Android APK:** ${{ steps.apk.outputs.url }}
-          EOF
-          gh release create "$TAG" \
-            --title "Release $TAG" \
-            --notes-file release-notes.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
