@@ -24,6 +24,7 @@ class FailureSummary(BaseModel):
     equipment: EquipmentSummary
     resolved: bool
     first_reported: datetime | None
+    last_reported: datetime | None
     report_count: int
 
 

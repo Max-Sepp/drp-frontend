@@ -16,9 +16,10 @@ def list_failures(repo: FailureRepository = Depends(get_failure_repo)) -> list[F
             equipment=failure.equipment,
             resolved=failure.resolved,
             first_reported=first_reported,
+            last_reported=last_reported,
             report_count=report_count,
         )
-        for failure, first_reported, report_count in repo.list_all_with_stats()
+        for failure, first_reported, last_reported, report_count in repo.list_all_with_stats()
     ]
 
 
@@ -53,11 +54,14 @@ def resolve_failure(
         raise HTTPException(status_code=404, detail="Failure not found")
     failure = repo.resolve(failure)
     reports = repo.list_active_reports(failure_id)
-    first_reported = min((r.breakdown_time for r in reports), default=None)
+    times = [r.breakdown_time for r in reports]
+    first_reported = min(times, default=None)
+    last_reported = max(times, default=None)
     return FailureSummary(
         id=failure.id,
         equipment=failure.equipment,
         resolved=failure.resolved,
         first_reported=first_reported,
+        last_reported=last_reported,
         report_count=len(reports),
     )

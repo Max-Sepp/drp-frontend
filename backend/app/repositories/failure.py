@@ -44,31 +44,24 @@ class FailureRepository:
         )
 
     def list_all_with_stats(self) -> list[tuple]:
-        """Return (Failure, first_reported, report_count) for every failure."""
-        first_reported_sq = (
-            select(func.min(OutageReport.breakdown_time))
-            .where(
-                OutageReport.failure_id == Failure.id,
-                _ACTIVE_FILTER,
+        """Return (Failure, first_reported, last_reported, report_count) for every failure."""
+        def _active_subquery(agg):
+            return (
+                select(agg)
+                .where(OutageReport.failure_id == Failure.id, _ACTIVE_FILTER)
+                .correlate(Failure)
+                .scalar_subquery()
             )
-            .correlate(Failure)
-            .scalar_subquery()
-        )
 
-        report_count_sq = (
-            select(func.count(OutageReport.id))
-            .where(
-                OutageReport.failure_id == Failure.id,
-                _ACTIVE_FILTER,
-            )
-            .correlate(Failure)
-            .scalar_subquery()
-        )
+        first_reported_sq = _active_subquery(func.min(OutageReport.breakdown_time))
+        last_reported_sq = _active_subquery(func.max(OutageReport.breakdown_time))
+        report_count_sq = _active_subquery(func.count(OutageReport.id))
 
         return (
             self._db.query(
                 Failure,
                 first_reported_sq.label("first_reported"),
+                last_reported_sq.label("last_reported"),
                 report_count_sq.label("report_count"),
             )
             .options(*_EQUIPMENT_JOINEDLOAD)
