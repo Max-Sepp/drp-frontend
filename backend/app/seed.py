@@ -4,6 +4,9 @@ from app.models.equipment import Equipment
 from app.models.equipment_type import EquipmentType
 from app.models.station import Station
 
+# Reference data inserted on every startup. Idempotent (skips rows that already exist),
+# so editing this list adds new entries to existing databases but never removes or renames.
+
 _DEFAULT_STATIONS = [
     "Victoria",
     "Waterloo",
@@ -30,6 +33,7 @@ _DEFAULT_EQUIPMENT = [
 
 
 def seed_defaults(db: Session) -> None:
+    """Insert default stations, equipment types, and equipment if they aren't already present."""
     for name in _DEFAULT_STATIONS:
         if not db.query(Station).filter_by(name=name).first():
             db.add(Station(name=name))
