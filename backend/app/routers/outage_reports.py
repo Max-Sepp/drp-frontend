@@ -51,7 +51,7 @@ def create_outage_report(
     try:
         return repo.create(payload)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        raise HTTPException(status_code=422, detail=str(exc))  # 422 Unprocessable Entity: valid JSON but semantically invalid (e.g. unknown equipment_id)
 
 
 @router.get("", response_model=list[OutageReportSummary])
