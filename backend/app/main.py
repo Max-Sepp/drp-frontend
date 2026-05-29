@@ -11,7 +11,8 @@ from app.routers import equipment, equipment_types, failures, outage_reports, st
 from app.seed import seed_defaults
 
 Base.metadata.create_all(bind=engine)
-seed_defaults(SessionLocal())
+with SessionLocal() as session:
+    seed_defaults(session)
 
 app = FastAPI()
 
