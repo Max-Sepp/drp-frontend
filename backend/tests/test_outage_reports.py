@@ -49,9 +49,13 @@ def _create_report(db: Session, **overrides) -> OutageReport:
         station_id=station.id, equipment_type_id=equipment_type.id
     ).first()
 
-    failure = Failure(equipment_id=equipment.id)
-    db.add(failure)
-    db.flush()
+    # Reuse the equipment's open failure if one exists (a partial unique index allows only one
+    # unresolved failure per equipment); otherwise start a new one.
+    failure = db.query(Failure).filter_by(equipment_id=equipment.id, resolved=False).first()
+    if failure is None:
+        failure = Failure(equipment_id=equipment.id)
+        db.add(failure)
+        db.flush()
 
     report = OutageReport(failure_id=failure.id, breakdown_time=breakdown_time, **overrides)
     db.add(report)

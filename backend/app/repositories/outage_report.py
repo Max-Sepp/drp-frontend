@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi import Depends
 from sqlalchemy import exists
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
@@ -106,17 +107,37 @@ class OutageReportRepository:
     # ------------------------------------------------------------------
 
     def _find_or_create_failure(self, equipment_id: int) -> Failure:
-        """Return the equipment's currently-open Failure, creating one if all prior failures are resolved."""
-        failure = (
+        """Return the equipment's currently-open Failure, creating one if all prior failures are resolved.
+
+        At most one unresolved Failure per equipment is enforced by a partial unique index. Because
+        this is a read-then-insert, two concurrent reports for the same equipment can both miss the
+        SELECT and try to INSERT a Failure; the index makes the loser's INSERT raise IntegrityError.
+        We catch that, roll back the failed insert, and re-read the open failure the winner committed
+        so both reports end up grouped under the same Failure.
+        """
+        failure = self._find_open_failure(equipment_id)
+        if failure is not None:
+            return failure
+
+        failure = Failure(equipment_id=equipment_id)
+        self._db.add(failure)
+        try:
+            self._db.flush()
+        except IntegrityError:
+            self._db.rollback()
+            failure = self._find_open_failure(equipment_id)
+            if failure is None:
+                # The conflict was not the open-failure index (e.g. a real error), so re-raise.
+                raise
+        return failure
+
+    def _find_open_failure(self, equipment_id: int) -> Failure | None:
+        """Return the equipment's single unresolved Failure, or None if all are resolved."""
+        return (
             self._db.query(Failure)
             .filter_by(equipment_id=equipment_id, resolved=False)
             .first()
         )
-        if failure is None:
-            failure = Failure(equipment_id=equipment_id)
-            self._db.add(failure)
-            self._db.flush()
-        return failure
 
 
 def get_repo(db: Session = Depends(get_db)) -> OutageReportRepository:

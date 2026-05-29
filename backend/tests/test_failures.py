@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.equipment import Equipment
 from app.models.equipment_type import EquipmentType
 from app.models.failure import Failure
 from app.models.station import Station
+from app.repositories.outage_report import OutageReportRepository
 
 _BASE_TIME = datetime(2024, 6, 1, 9, 0, 0, tzinfo=timezone.utc)
 
@@ -117,6 +120,68 @@ def test_two_sequential_failures_for_same_equipment_have_distinct_ids(
     client.patch(f"/failures/{failure_b}/resolve")
 
     assert failure_a != failure_b
+
+
+# ---------------------------------------------------------------------------
+# Concurrency guard: one open failure per equipment
+# ---------------------------------------------------------------------------
+
+
+def test_second_open_failure_for_equipment_is_rejected(db_session: Session) -> None:
+    equipment_id = _equipment_id(db_session)
+    db_session.add(Failure(equipment_id=equipment_id))
+    db_session.commit()
+
+    db_session.add(Failure(equipment_id=equipment_id))
+    with pytest.raises(IntegrityError):
+        db_session.commit()
+    db_session.rollback()
+
+
+def test_resolved_failures_do_not_block_a_new_open_failure(db_session: Session) -> None:
+    equipment_id = _equipment_id(db_session)
+    db_session.add(Failure(equipment_id=equipment_id, resolved=True))
+    db_session.add(Failure(equipment_id=equipment_id, resolved=True))
+    db_session.add(Failure(equipment_id=equipment_id, resolved=False))
+
+    db_session.commit()  # partial index only covers resolved=false rows, so this is allowed
+
+    open_failures = (
+        db_session.query(Failure)
+        .filter_by(equipment_id=equipment_id, resolved=False)
+        .count()
+    )
+    assert open_failures == 1
+
+
+def test_find_or_create_failure_recovers_from_a_concurrent_insert(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Simulate losing the create race: the initial SELECT misses, the INSERT hits the unique
+    index, and the repository recovers by re-reading the open failure the winner committed."""
+    equipment_id = _equipment_id(db_session)
+    winner = Failure(equipment_id=equipment_id)
+    db_session.add(winner)
+    db_session.commit()
+    winner_id = winner.id
+
+    repo = OutageReportRepository(db_session)
+    real_find_open = repo._find_open_failure
+    calls = {"n": 0}
+
+    def fake_find_open(eid: int):
+        calls["n"] += 1
+        # First call = the pre-insert SELECT: pretend we saw no open failure (the race).
+        # Later call = the post-conflict re-read: behave normally and find the winner.
+        if calls["n"] == 1:
+            return None
+        return real_find_open(eid)
+
+    monkeypatch.setattr(repo, "_find_open_failure", fake_find_open)
+
+    failure = repo._find_or_create_failure(equipment_id)
+
+    assert failure.id == winner_id
 
 
 # ---------------------------------------------------------------------------
