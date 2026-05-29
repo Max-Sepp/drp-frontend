@@ -17,10 +17,9 @@ on:
       platform:
         description: Platform
         required: true
-        default: all
+        default: android
         type: choice
         options:
-          - all
           - android
           - ios
 
@@ -49,7 +48,7 @@ jobs:
         run: |
           BUILDS=$(npx eas-cli@19.1.0 build \
             --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }} \
-            --platform ${{ github.event_name == 'push' && 'all' || inputs.platform }} \
+            --platform ${{ github.event_name == 'push' && 'android' || inputs.platform }} \
             --non-interactive \
             --json)
           ANDROID_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "ANDROID") | .id')
