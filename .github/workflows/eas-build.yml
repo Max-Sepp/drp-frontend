@@ -29,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       android-build-id: ${{ steps.eas-build.outputs.android-build-id }}
-      ios-build-id: ${{ steps.eas-build.outputs.ios-build-id }}
     defaults:
       run:
         working-directory: frontend
@@ -54,15 +53,13 @@ jobs:
             --non-interactive \
             --json)
           ANDROID_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "ANDROID") | .id')
-          IOS_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "IOS") | .id')
           echo "android-build-id=$ANDROID_ID" >> "$GITHUB_OUTPUT"
-          echo "ios-build-id=$IOS_ID" >> "$GITHUB_OUTPUT"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
   release:
     needs: build
-    if: needs.build.outputs.android-build-id != '' || needs.build.outputs.ios-build-id != ''
+    if: needs.build.outputs.android-build-id != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -71,7 +68,6 @@ jobs:
 
       - name: Get APK download URL
         id: apk
-        if: needs.build.outputs.android-build-id != ''
         working-directory: frontend
         run: |
           URL=$(npx eas-cli@19.1.0 build:view ${{ needs.build.outputs.android-build-id }} \
@@ -81,30 +77,13 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Get IPA download URL
-        id: ipa
-        if: needs.build.outputs.ios-build-id != ''
-        working-directory: frontend
-        run: |
-          URL=$(npx eas-cli@19.1.0 build:view ${{ needs.build.outputs.ios-build-id }} \
-            --json \
-            --non-interactive | jq -r '.artifacts.applicationArchiveUrl')
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
       - name: Create GitHub Release
         run: |
           TAG=${{ github.ref_name }}
-          {
-            echo "### Downloads"
-            if [ -n "${{ steps.apk.outputs.url }}" ]; then
-              echo "**Android APK:** ${{ steps.apk.outputs.url }}"
-            fi
-            if [ -n "${{ steps.ipa.outputs.url }}" ]; then
-              echo "**iOS IPA:** ${{ steps.ipa.outputs.url }}"
-            fi
-          } > release-notes.md
+          cat > release-notes.md <<EOF
+          ### Downloads
+          **Android APK:** ${{ steps.apk.outputs.url }}
+          EOF
           gh release create "$TAG" \
             --title "Release $TAG" \
             --notes-file release-notes.md
