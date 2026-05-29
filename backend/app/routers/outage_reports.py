@@ -48,7 +48,10 @@ def create_outage_report(
 
     To attach an image, follow up with POST /outage-reports/{id}/image.
     """
-    return repo.create(payload)
+    try:
+        return repo.create(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
 @router.get("", response_model=list[OutageReportSummary])
@@ -65,7 +68,7 @@ def get_outage_report(
     repo: OutageReportRepository = Depends(get_repo),
 ) -> OutageReportSummary:
     """Return a single outage report by ID."""
-    report = repo.get(report_id)
+    report = repo.get_active(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Outage report not found")
     return report
@@ -74,13 +77,14 @@ def get_outage_report(
 @router.delete("/{report_id}", status_code=204)
 def delete_outage_report(
     report_id: int,
+    reason: str | None = None,
     repo: OutageReportRepository = Depends(get_repo),
 ) -> None:
-    """Delete an outage report and its associated image."""
+    """Soft-delete an outage report (creates a deletion record, row is kept)."""
     report = repo.get(report_id)
-    if report is None:
+    if report is None or repo.is_deleted(report_id):
         raise HTTPException(status_code=404, detail="Outage report not found")
-    repo.delete(report)
+    repo.soft_delete(report, reason=reason)
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +102,7 @@ async def upload_image(
 
     Accepted content types: JPEG, PNG, WebP, GIF.
     """
-    report = repo.get(report_id)
+    report = repo.get_active(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Outage report not found")
 
@@ -119,7 +123,7 @@ def download_image(
     repo: OutageReportRepository = Depends(get_repo),
 ) -> Response:
     """Download the raw image attached to an outage report."""
-    report = repo.get(report_id)
+    report = repo.get_active(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Outage report not found")
     if report.image is None:
