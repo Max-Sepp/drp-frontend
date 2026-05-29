@@ -53,7 +53,7 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
           <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
             {'< back'}
           </Text>
-          <Text fontSize={22} fontWeight="700" color="#1a1a1a">Describe the issue</Text>
+          <Text fontSize={22} fontWeight="700" color="#fc0202">Describe the issue</Text>
         </YStack>
       </SafeAreaView>
 
