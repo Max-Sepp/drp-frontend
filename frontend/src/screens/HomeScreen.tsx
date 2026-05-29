@@ -46,6 +46,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [station, setStation] = useState<Station>(DEFAULT_STATION)
   const [reports, setReports] = useState<OutageReport[]>([])
   const [loading, setLoading] = useState(false)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
   const fetchReports = useCallback(async () => {
     setLoading(true)
     const { data } = await apiClient.GET('/outage-reports')
@@ -104,33 +105,48 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       ) : (
         <YStack mx="$4" mt="$4" gap="$2">
           {reports.map(r => {
-            return (
-              <YStack key={r.id} style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
-                <XStack p="$4" items="center" gap="$3">
-                  <YStack style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#b91c1c', alignItems: 'center', justifyContent: 'center' }}>
-                    <Text color="white" fontWeight="700" fontSize={18}>!</Text>
-                  </YStack>
-                  <YStack flex={1}>
-                    <Text fontSize={14} fontWeight="700" color="#7f1d1d">{alertLabel(r)}</Text>
-                    <Text fontSize={12} color="#991b1b" mt="$1">
-                      reported at {formatTime(r.breakdown_time)}{isToday(r.breakdown_time) ? ' today' : ''}
-                    </Text>
-                  </YStack>
-                </XStack>
-                {(r.description || r.image_content_type) && (
-                  <YStack px="$4" pb="$4" gap="$3">
-                    {r.description ? (
-                      <Text fontSize={13} color="#7f1d1d">{r.description}</Text>
-                    ) : null}
-                    {r.image_content_type ? (
+            const expanded = expandedId === r.id
+            const hasPhoto = !!r.image_content_type
+            const header = (
+              <XStack p="$4" items="center" gap="$3">
+                <YStack style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#b91c1c', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text color="white" fontWeight="700" fontSize={18}>!</Text>
+                </YStack>
+                <YStack flex={1}>
+                  <Text fontSize={14} fontWeight="700" color="#7f1d1d">{alertLabel(r)}</Text>
+                  <Text fontSize={12} color="#991b1b" mt="$1">
+                    reported at {formatTime(r.breakdown_time)}{isToday(r.breakdown_time) ? ' today' : ''}
+                  </Text>
+                </YStack>
+                {hasPhoto && <Text fontSize={12} color="#991b1b">{expanded ? '▲' : '▼'}</Text>}
+              </XStack>
+            )
+            return hasPhoto ? (
+              <Pressable key={r.id} onPress={() => setExpandedId(expanded ? null : r.id)}>
+                <YStack style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
+                  {header}
+                  {expanded && (
+                    <YStack px="$4" pb="$4" gap="$3">
+                      {r.description ? (
+                        <Text fontSize={13} color="#7f1d1d">{r.description}</Text>
+                      ) : null}
                       <Image
                         source={{ uri: `${BASE_URL}/outage-reports/${r.id}/image` }}
                         style={{ width: '100%', height: 180, borderRadius: 8 }}
                         resizeMode="cover"
                       />
-                    ) : null}
+                    </YStack>
+                  )}
+                </YStack>
+              </Pressable>
+            ) : (
+              <YStack key={r.id} style={{ backgroundColor: '#fee2e2', borderRadius: 10 }}>
+                {header}
+                {r.description ? (
+                  <YStack px="$4" pb="$4">
+                    <Text fontSize={13} color="#7f1d1d">{r.description}</Text>
                   </YStack>
-                )}
+                ) : null}
               </YStack>
             )
           })}
