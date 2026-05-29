@@ -10,6 +10,8 @@ from app.schemas.equipment import EquipmentSummary
 
 
 class EquipmentRepository:
+    """Read-only access to Equipment with its Station and EquipmentType eagerly loaded."""
+
     def __init__(self, db: Session) -> None:
         self._db = db
 
@@ -29,7 +31,7 @@ class EquipmentRepository:
         return [EquipmentSummary.model_validate(e) for e in rows]
 
     def list_all(self, station_id: int | None = None) -> list[EquipmentSummary]:
-        """Return all equipment, optionally filtered by station_id."""
+        """Return all equipment (optionally filtered to one station), ordered by station / type / connection."""
         all_equipment = self._all()
         if station_id is not None:
             return [e for e in all_equipment if e.station.id == station_id]
@@ -37,4 +39,5 @@ class EquipmentRepository:
 
 
 def get_equipment_repo(db: Session = Depends(get_db)) -> EquipmentRepository:
+    """FastAPI dependency that yields a session-scoped EquipmentRepository."""
     return EquipmentRepository(db)

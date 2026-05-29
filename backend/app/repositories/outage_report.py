@@ -11,6 +11,7 @@ from app.models.outage_report import OutageReport
 from app.models.outage_report_deletion import OutageReportDeletion
 from app.schemas.outage_report import OutageReportCreate
 
+# Excludes reports that have a corresponding OutageReportDeletion row (soft-deleted).
 _ACTIVE_FILTER = ~exists().where(OutageReportDeletion.report_id == OutageReport.id)
 
 _REPORT_JOINEDLOAD = [
@@ -24,6 +25,8 @@ _REPORT_JOINEDLOAD = [
 
 
 class OutageReportRepository:
+    """Data access for OutageReport rows, including soft-delete and image attachment."""
+
     def __init__(self, db: Session) -> None:
         self._db = db
 
@@ -32,9 +35,11 @@ class OutageReportRepository:
     # ------------------------------------------------------------------
 
     def get(self, report_id: int) -> OutageReport | None:
+        """Fetch a report by id regardless of soft-deletion state."""
         return self._db.get(OutageReport, report_id)
 
     def get_active(self, report_id: int) -> OutageReport | None:
+        """Fetch a non-deleted report with its failure/equipment/station eagerly loaded."""
         return (
             self._db.query(OutageReport)
             .options(*_REPORT_JOINEDLOAD)
@@ -43,6 +48,7 @@ class OutageReportRepository:
         )
 
     def list_all(self) -> list[OutageReport]:
+        """List active reports newest first, with related rows eagerly loaded."""
         return (
             self._db.query(OutageReport)
             .options(*_REPORT_JOINEDLOAD)
@@ -52,6 +58,7 @@ class OutageReportRepository:
         )
 
     def is_deleted(self, report_id: int) -> bool:
+        """True if a soft-deletion record exists for this report id."""
         return self._db.query(
             exists().where(OutageReportDeletion.report_id == report_id)
         ).scalar()
@@ -61,6 +68,7 @@ class OutageReportRepository:
     # ------------------------------------------------------------------
 
     def create(self, payload: OutageReportCreate) -> OutageReport:
+        """Persist a new report, attaching it to the equipment's open Failure (creating one if needed)."""
         if self._db.get(Equipment, payload.equipment_id) is None:
             raise ValueError(f"equipment_id {payload.equipment_id} not found")
 
@@ -76,6 +84,7 @@ class OutageReportRepository:
         return self.get_active(report.id)
 
     def soft_delete(self, report: OutageReport, reason: str | None = None) -> None:
+        """Mark a report as deleted by inserting an OutageReportDeletion row; the report itself is preserved."""
         deletion = OutageReportDeletion(
             report_id=report.id,
             deleted_at=datetime.now(tz=timezone.utc),
@@ -85,6 +94,7 @@ class OutageReportRepository:
         self._db.commit()
 
     def set_image(self, report: OutageReport, image: bytes, content_type: str) -> OutageReport:
+        """Attach or replace the image bytes stored on a report row."""
         report.image = image
         report.image_content_type = content_type
         self._db.commit()
@@ -96,6 +106,7 @@ class OutageReportRepository:
     # ------------------------------------------------------------------
 
     def _find_or_create_failure(self, equipment_id: int) -> Failure:
+        """Return the equipment's currently-open Failure, creating one if all prior failures are resolved."""
         failure = (
             self._db.query(Failure)
             .filter_by(equipment_id=equipment_id, resolved=False)
@@ -109,4 +120,5 @@ class OutageReportRepository:
 
 
 def get_repo(db: Session = Depends(get_db)) -> OutageReportRepository:
+    """FastAPI dependency that yields a session-scoped OutageReportRepository."""
     return OutageReportRepository(db)

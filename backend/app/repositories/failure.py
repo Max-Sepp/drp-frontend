@@ -10,13 +10,18 @@ from app.models.outage_report import OutageReport
 from app.models.outage_report_deletion import OutageReportDeletion
 from app.models.station import Station
 
+# Excludes reports that have a corresponding OutageReportDeletion row (soft-deleted).
 _ACTIVE_FILTER = ~exists().where(OutageReportDeletion.report_id == OutageReport.id)
 
+# Eager-load options for Failure queries: pulls equipment + its station and type in one round trip,
+# so callers can read failure.equipment.station / .equipment_type without triggering lazy-load SELECTs.
 _EQUIPMENT_JOINEDLOAD = [
     joinedload(Failure.equipment).joinedload(Equipment.station),
     joinedload(Failure.equipment).joinedload(Equipment.equipment_type),
 ]
 
+# Same idea, but for queries starting from OutageReport: walks report → failure → equipment → station/type
+# eagerly to avoid N+1 SELECTs when serializing a list of reports.
 _REPORT_JOINEDLOAD = [
     joinedload(OutageReport.failure).joinedload(Failure.equipment).joinedload(Equipment.station),
     joinedload(OutageReport.failure).joinedload(Failure.equipment).joinedload(Equipment.equipment_type),
@@ -24,10 +29,13 @@ _REPORT_JOINEDLOAD = [
 
 
 class FailureRepository:
+    """Data access for Failure rows and their aggregated active-report stats."""
+
     def __init__(self, db: Session) -> None:
         self._db = db
 
     def get(self, failure_id: int) -> Failure | None:
+        """Fetch a failure with its equipment/station/type eagerly loaded."""
         return (
             self._db.query(Failure)
             .options(*_EQUIPMENT_JOINEDLOAD)
@@ -79,6 +87,7 @@ class FailureRepository:
         )
 
     def resolve(self, failure: Failure) -> Failure:
+        """Mark a failure as resolved; subsequent reports on the same equipment will open a new Failure."""
         failure.resolved = True
         self._db.commit()
         self._db.refresh(failure)
@@ -86,4 +95,5 @@ class FailureRepository:
 
 
 def get_failure_repo(db: Session = Depends(get_db)) -> FailureRepository:
+    """FastAPI dependency that yields a session-scoped FailureRepository."""
     return FailureRepository(db)
