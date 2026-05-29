@@ -7,14 +7,18 @@ from app.models.equipment_type import EquipmentType
 from app.models.station import Station
 from app.schemas.equipment import EquipmentSummary
 
+# Process-wide cache of the full equipment list; per-station filtering is done in memory below.
 _cache: list[EquipmentSummary] | None = None
 
 
 class EquipmentRepository:
+    """Read-only access to Equipment with its Station and EquipmentType eagerly loaded."""
+
     def __init__(self, db: Session) -> None:
         self._db = db
 
     def list_all(self, station_id: int | None = None) -> list[EquipmentSummary]:
+        """Return all equipment (optionally filtered to one station), ordered by station / type / connection."""
         global _cache
         if _cache is None:
             rows = (
@@ -35,4 +39,5 @@ class EquipmentRepository:
 
 
 def get_equipment_repo(db: Session = Depends(get_db)) -> EquipmentRepository:
+    """FastAPI dependency that yields a session-scoped EquipmentRepository."""
     return EquipmentRepository(db)
