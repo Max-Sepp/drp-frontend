@@ -7,6 +7,8 @@ from app.database import Base
 
 
 class OutageReport(Base):
+    """A user-submitted report that a piece of equipment is broken, attached to a Failure."""
+
     __tablename__ = "outage_reports"
 
     id: Mapped[int] = mapped_column(primary_key=True)

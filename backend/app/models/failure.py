@@ -5,6 +5,8 @@ from app.database import Base
 
 
 class Failure(Base):
+    """A single outage of a piece of equipment, aggregating one or more user reports until resolved."""
+
     __tablename__ = "failures"
 
     id: Mapped[int] = mapped_column(primary_key=True)
