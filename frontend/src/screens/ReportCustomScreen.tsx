@@ -1,13 +1,13 @@
+import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Input, ScrollView, TextArea, Text, XStack, YStack } from 'tamagui'
-import { stationPicker } from '../navigation/stationPicker'
-import type { ReportCustomScreenProps, Station } from '../navigation/types'
+import type { ReportCustomScreenProps } from '../navigation/types'
 
 export default function ReportCustomScreen({ navigation, route }: ReportCustomScreenProps) {
-  const [station, setStation] = useState<Station>(route.params.station)
+  const { station } = route.params
   const [description, setDescription] = useState('')
   const [area, setArea] = useState('')
   const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null)
@@ -46,51 +46,36 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 48 } as any} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'white' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 16 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
-        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
-          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
-            {'< back'}
-          </Text>
-          <Text fontSize={22} fontWeight="700" color="#fc0202">Describe the issue</Text>
+        <YStack style={{ height: 96, justifyContent: 'center', paddingBottom: 8 }} px="$5" gap="$1">
+          <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={18} color="#2563eb" />
+            <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
+          </XStack>
+          <Text fontSize={22} fontWeight="700" color="#1a1a1a">Describe the issue</Text>
+          <Text fontSize={16} color="#4a6fa5" mt="$1">{station}</Text>
         </YStack>
       </SafeAreaView>
 
       {/* Description */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">issue description</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Issue description</Text>
         <TextArea
           value={description}
           onChangeText={setDescription}
           placeholder="e.g. fallen light blocking path to escalator"
           placeholderTextColor="$gray9"
           numberOfLines={4}
+          textAlignVertical="top"
           style={{ minHeight: 100, borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#111827', fontSize: 15 }}
         />
       </YStack>
 
-      {/* Station picker */}
-      <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">station</Text>
-        <XStack
-          items="center"
-          justify="space-between"
-          pressStyle={{ opacity: 0.7 }}
-          onPress={() => {
-            stationPicker.register(setStation)
-            navigation.navigate('SelectStation', { currentStation: station })
-          }}
-          style={{ borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: '#f9fafb' }}
-        >
-          <Text fontSize={15} color="#111827">{station}</Text>
-          <Text fontSize={13} color="#6b7280">v</Text>
-        </XStack>
-      </YStack>
-
       {/* Area */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">area within station (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Area within station (optional)</Text>
         <Input
           value={area}
           onChangeText={setArea}
@@ -102,7 +87,7 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
 
       {/* Photo */}
       <YStack px="$5" mt="$5">
-        <Text fontSize={12} fontWeight="600" color="#6b7280" mb="$2">attach photo (optional)</Text>
+        <Text fontSize={14} fontWeight="600" color="#6b7280" mb="$2">Attach photo (optional)</Text>
         <YStack
           items="center"
           justify="center"
@@ -118,10 +103,11 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
         </YStack>
       </YStack>
 
-      {/* Submit */}
+    </ScrollView>
+    <SafeAreaView edges={['bottom']} style={{ backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
       <YStack
         mx="$5"
-        mt="$8"
+        my="$3"
         items="center"
         justify="center"
         pressStyle={{ opacity: 0.8 }}
@@ -130,7 +116,7 @@ export default function ReportCustomScreen({ navigation, route }: ReportCustomSc
       >
         <Text color="white" fontSize={16} fontWeight="700">Submit</Text>
       </YStack>
-    </ScrollView>
+    </SafeAreaView>
     </KeyboardAvoidingView>
   )
 }

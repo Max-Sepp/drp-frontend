@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { FlatList } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
+import { useEffect, useState } from 'react'
+import { FlatList, Keyboard } from 'react-native'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Input, Separator, Text, XStack, YStack } from 'tamagui'
 import { STATIONS } from '../constants/stations'
 import { stationPicker } from '../navigation/stationPicker'
@@ -9,6 +10,17 @@ import type { SelectStationScreenProps, Station } from '../navigation/types'
 export default function SelectStationScreen({ navigation, route }: SelectStationScreenProps) {
   const { currentStation } = route.params
   const [query, setQuery] = useState('')
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const insets = useSafeAreaInsets()
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', e => setKeyboardHeight(e.endCoordinates.height))
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0))
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
 
   const filtered = STATIONS.filter(s =>
     s.name.toLowerCase().includes(query.toLowerCase())
@@ -22,10 +34,11 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
   return (
     <YStack flex={1} style={{ backgroundColor: 'white' }}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
-        <YStack style={{ height: 56, justifyContent: 'center' }} px="$5">
-          <Text fontSize={14} color="#2563eb" mb="$2" onPress={() => navigation.goBack()}>
-            {'< back'}
-          </Text>
+        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
+          <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={18} color="#2563eb" />
+            <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
+          </XStack>
           <Text fontSize={22} fontWeight="700" color="#1a1a1a">Select station</Text>
         </YStack>
       </SafeAreaView>
@@ -67,7 +80,7 @@ export default function SelectStationScreen({ navigation, route }: SelectStation
         }}
       />
 
-      <YStack style={{ borderTopWidth: 1, borderColor: '#e5e7eb' }} px="$4" py="$2.5">
+      <YStack px="$4" pt="$2.5" style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingBottom: keyboardHeight > 0 ? 10 : (insets.bottom || 10), marginBottom: keyboardHeight > 0 ? keyboardHeight + insets.bottom : 0 }}>
         <Input
           value={query}
           onChangeText={setQuery}
