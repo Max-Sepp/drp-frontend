@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Input, ScrollView, TextArea, Text, XStack, YStack } from 'tamagui'
 import type { ReportCustomScreenProps } from '../navigation/types'
 
-export default function ReportCustomScreen({ navigation }: ReportCustomScreenProps) {
+export default function ReportCustomScreen({ navigation, route }: ReportCustomScreenProps) {
+  const { station } = route.params
   const [description, setDescription] = useState('')
   const [area, setArea] = useState('')
   const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null)
@@ -48,12 +49,13 @@ export default function ReportCustomScreen({ navigation }: ReportCustomScreenPro
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'white' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView flex={1} style={{ backgroundColor: 'white' }} contentContainerStyle={{ paddingBottom: 16 } as any} keyboardShouldPersistTaps="handled">
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#dbeafe' }}>
-        <YStack style={{ height: 72, justifyContent: 'center' }} px="$5" gap="$1">
+        <YStack style={{ height: 96, justifyContent: 'center', paddingBottom: 8 }} px="$5" gap="$1">
           <XStack items="center" gap="$1" mb="$2" style={{ alignSelf: 'flex-start' }} pressStyle={{ opacity: 0.6 }} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={18} color="#2563eb" />
             <Text fontSize={14} fontWeight="500" color="#2563eb">Back</Text>
           </XStack>
           <Text fontSize={22} fontWeight="700" color="#1a1a1a">Describe the issue</Text>
+          <Text fontSize={16} color="#4a6fa5" mt="$1">{station}</Text>
         </YStack>
       </SafeAreaView>
 
