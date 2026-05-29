@@ -17,9 +17,10 @@ on:
       platform:
         description: Platform
         required: true
-        default: android
+        default: all
         type: choice
         options:
+          - all
           - android
           - ios
 
@@ -50,6 +51,7 @@ jobs:
             --profile ${{ github.event_name == 'push' && 'production' || inputs.profile }} \
             --platform ${{ github.event_name == 'push' && 'android' || inputs.platform }} \
             --non-interactive \
+            --wait \
             --json)
           ANDROID_ID=$(echo "$BUILDS" | jq -r '.[] | select(.platform == "ANDROID") | .id')
           echo "android-build-id=$ANDROID_ID" >> "$GITHUB_OUTPUT"
